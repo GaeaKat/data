@@ -6,7 +6,7 @@ namespace data {
     namespace number {
         
         namespace gmp {
-            bool N::operator==(gmp_uint n) const {
+            bool N::operator==(uint n) const {
                 return __gmp_binary_equal::eval(&MPZ, n);
             }
                 
@@ -30,13 +30,13 @@ namespace data {
                 return !__gmp_binary_less::eval(&MPZ, &n.MPZ);
             }
                 
-            N N::operator+(gmp_uint n) const {
+            N N::operator+(uint n) const {
                 N sum{};
                 __gmp_binary_plus::eval(&sum.MPZ, &MPZ, n);
                 return sum;
             }
                 
-            N& N::operator+=(gmp_uint n) {
+            N& N::operator+=(uint n) {
                 __gmp_binary_plus::eval(&MPZ, &MPZ, n);
                 return *this;
             }
@@ -67,13 +67,13 @@ namespace data {
                 return *this;
             }
                 
-            N N::operator^(gmp_uint n) const {
+            N N::operator^(uint n) const {
                 N pow{};
                 mpz_pow_ui(&pow.MPZ, &MPZ, n);
                 return pow;
             }
                 
-            N& N::operator^=(gmp_uint n) {
+            N& N::operator^=(uint n) {
                 mpz_pow_ui(&MPZ, &MPZ, n);
                 return *this;
             }
@@ -87,3 +87,5 @@ namespace data {
         }
         
     }
+    
+}
