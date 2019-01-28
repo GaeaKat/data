@@ -14,6 +14,7 @@ namespace data {
         namespace gmp {
             
             struct Z;
+            struct Q;
             
             struct N final : public mpz {
                 N() : mpz() {}
@@ -45,6 +46,14 @@ namespace data {
                 bool operator<=(N& n) const;
                 
                 bool operator>=(N& n) const;
+                
+                bool operator<(uint n) const;
+                
+                bool operator>(uint n) const;
+                
+                bool operator<=(uint n) const;
+                
+                bool operator>=(uint n) const;
                 
                 N successor() const;
                 
@@ -89,6 +98,7 @@ namespace data {
                 }
                 
                 friend struct Z;
+                friend struct Q;
             };
               
             constexpr static math::number::natural<N> is_natural{};

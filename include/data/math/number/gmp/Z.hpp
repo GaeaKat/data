@@ -47,6 +47,14 @@ namespace data {
                 
                 bool operator>=(Z& n) const;
                 
+                bool operator<(int n) const;
+                
+                bool operator>(int n) const;
+                
+                bool operator<=(int n) const;
+                
+                bool operator>=(int n) const;
+                
                 Z operator+(Z&) const;
                 
                 Z& operator+=(Z&);
@@ -94,6 +102,8 @@ namespace data {
                     Z r = this->operator%(n);
                     return this->operator=(r);
                 }
+                
+                friend struct Q;
             };
               
             constexpr static math::number::natural<Z> is_integer{};
