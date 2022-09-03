@@ -29,7 +29,7 @@ namespace data {
     using Z = data::math::number::GMP::Z;
 
     TEST(AbsTest, TestDecrement) {
-        
+        ASSERT_EQ(0,1);
         int_big<9> ib9{0};
         int_big<10> ib10{0};
         int_big<11> ib11{0};
