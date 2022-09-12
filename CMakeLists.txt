@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.1...3.14)
 if(${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif()
-set(CMAKE_C_COMPILER "gcc-10")
-set(CMAKE_CXX_COMPILER "g++-10")
+#set(CMAKE_C_COMPILER "gcc-10")
+#set(CMAKE_CXX_COMPILER "g++-10")
 
 project(data 	VERSION 1.0
         DESCRIPTION "wrappers and high-level programming constructs in c++"
@@ -118,4 +118,4 @@ message(STATUS ${OUT})
 # Set C++ version
 target_compile_features(data PUBLIC cxx_std_20)
 set_target_properties(data PROPERTIES CXX_EXTENSIONS ON)
-target_compile_options(data PUBLIC "-fconcepts")
+target_compile_options(data PUBLIC -std=c++20 -Xclang)
