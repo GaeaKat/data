@@ -58,6 +58,7 @@ add_library(
   src/data/networking/REST.cpp
   src/data/networking/JSON.cpp
   src/data/networking/TCP.cpp
+  src/data/networking/Websocket_Client.cpp
   src/data/tools/channel.cpp
   src/data/crypto/secret_share.cpp
   src/data/math/number/gmp/mpq.cpp

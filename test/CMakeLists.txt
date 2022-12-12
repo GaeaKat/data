@@ -64,3 +64,10 @@ package_add_test(testIP testIP.cpp)
 package_add_test(testException testException.cpp)
 #package_add_test(testRateLimiter testRateLimiter.cpp)
 #package_add_test(testNetworking testNetworking.cpp)
+
+option(PACKAGE_NETWORK_TESTS "Build the Networking based tests" OFF)
+
+if(PACKAGE_NETWORK_TESTS)
+#    package_add_test(testNetworking testNetworking.cpp)
+    package_add_test(testWebsockets testWebsockets.cpp)
+endif()
