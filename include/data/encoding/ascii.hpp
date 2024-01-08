@@ -6,42 +6,44 @@
 #define DATA_ENCODING_ASCII
 
 #include <string>
+#include <data/string.hpp>
 #include <data/cross.hpp>
+#include <data/encoding/unicode.hpp>
 
-namespace data::encoding::ascii {
-    const std::string Format{"ascii"};
+namespace data::encoding::ASCII {
+    const std::string Format {"ascii"};
     
     const byte max = 0x7f;
 
-    using character = byte;
-
-    bool inline valid(character b) {
-        return b <= max && b >= 0;
-    }
-
-    bool inline valid(char c) {
+    bool inline valid (char c) {
         return c <= max && c >= 0;
     }
     
-    bool inline valid(const std::string &x) {
-        for (char c : x) if (!valid(c)) return false;
+    bool inline valid (string_view x) {
+        for (char c : x) if (!valid (c)) return false;
         return true;
     }
 
-    struct string : std::string {
-        using std::string::string;
+    struct string : data::string {
+        using data::string::string;
         
-        string(const std::string& x) : std::string{x} {}
-        
-        bool valid() const {
-            return ascii::valid(*this);
+        bool valid () const {
+            return ASCII::valid (*this);
         }
-        
-        explicit operator bytes() const;
+
+        explicit operator bytes () const;
+
+        explicit operator data::UTF8 () const;
 
     };
     
-    string write(const bytes_view x);
+    // for emails
+    string encode (const bytes_view x);
+    bytes decode (const string &);
+}
+
+namespace data {
+    using ASCII = encoding::ASCII::string;
 }
 
 #endif 

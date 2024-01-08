@@ -12,7 +12,7 @@ namespace data::crypto {
     // one_way asserts that a non-invertable
     // function exists which takes s to p. 
     template <typename f, typename p, typename s>
-    concept one_way = function<f, p, s>;
+    concept one_way = functional::function<f, p, s>;
     
     // keypair is an assertion that to_public
     // is a non-invertable function between

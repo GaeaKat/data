@@ -34,6 +34,8 @@
 #include <data/cross.hpp>
 #include <data/fold.hpp>
 
+#include <data/string.hpp>
+
 namespace data {
     
     template <typename X> using stack = linked_stack<X>;
@@ -60,18 +62,42 @@ namespace data {
     template <typename X> using ordered_list = tool::ordered_stack<stack<X>>;
     
     template <typename f, sequence A, sequence B> 
-    auto map_thread(f fun, A a, B b) {
-        if (data::size(a) != data::size(b)) throw exception {"lists must be the same size"};
+    auto map_thread (f fun, A a, B b) {
+        if (data::size (a) != data::size (b)) throw exception {"lists must be the same size"};
         
-        list<decltype(fun(data::first(std::declval<A>()), data::first(std::declval<B>())))> l;
+        list<decltype (fun (data::first (std::declval<A> ()), data::first (std::declval<B> ())))> l;
         
-        while (data::size(a) != 0) {
-            l = data::append(l, fun(data::first(a), data::first(b)));
-            a = a.rest();
-            b = b.rest();
+        while (data::size (a) != 0) {
+            l = data::append (l, fun (data::first (a), data::first (b)));
+            a = a.rest ();
+            b = b.rest ();
         }
         
         return l;
+    }
+
+    // split a string by a delimiter.
+    list<string> split (string_view str, const string &delimiter);
+
+    template <typename map, typename key, typename value>
+    map inline replace_part (map X, const key &k, const value &v) {
+        return X.contains (k) ? X.remove (k).insert (k, v) : X;
+    }
+
+    template <typename elem>
+    stack<elem> reverse (const ordered_list<elem> x) {
+        stack<elem> n;
+        for (const elem &e : x) n <<= e;
+        return n;
+    }
+
+    template <typename elem>
+    ordered_list<elem> select (const ordered_list<elem> x, function<bool (const elem &)> satisfies) {
+        stack<const elem &> n;
+        for (const elem &e : x) if (satisfies (e)) n <<= e;
+        ordered_list<elem> r;
+        for (const elem &e : n) r = r.insert (e);
+        return r;
     }
 
 }

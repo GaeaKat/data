@@ -5,13 +5,20 @@
 #ifndef DATA_MATH
 #define DATA_MATH
 
+#include <data/math/fraction.hpp>
 #include <data/math/permutation.hpp>
+#include <data/math/polynomial.hpp>
 
 namespace data {
     
+    // fractions
+    template <typename Z, typename N = decltype (abs (std::declval<Z> ()))> using fraction = math::fraction<Z, N>;
+    
     // permutations
-    template <typename X>
-    using permutation = data::math::permutation<X>;
+    template <typename X> using permutation = math::permutation<X>;
+    
+    // Polynomials 
+    template <typename X, typename N, char x = 'x'> using polynomial = math::polynomial<X, N, x>;
     
 }
 

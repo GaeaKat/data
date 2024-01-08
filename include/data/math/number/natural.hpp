@@ -13,54 +13,66 @@
 #include <data/math/division.hpp>
 #include <data/math/commutative.hpp>
 #include <data/math/associative.hpp>
+#include <data/io/wait_for_enter.hpp>
 
 namespace data::math::number::natural {
     
     // Generic division algorithm. 
     template <typename N>
-    static division<N> divide(const N Dividend, const N Divisor) {
+    static division<N> divide (const N &Dividend, const N &Divisor) {
+
+        if (Divisor == 0) throw division_by_zero {};
+        if (Divisor == 1) return {Dividend, 0u};
+        if (Divisor == 2) return {Dividend >> 1, Dividend & 1u};
         
-        if (Divisor == 0) throw division_by_zero{};
-        if (Divisor == 1) return {Dividend, 0};
-        if (Divisor == 2) return {Dividend >> 1, Dividend & N{1}};
-        
-        N pow = 1;
-        N exp = Divisor;
-        N remainder = Dividend;
-        N quotient = 0;
-        uint64 digits = 1;
-        
-        while (exp <= remainder) { 
-            exp <<= digits;
-            pow <<= digits;
-            digits <<= 1;
-        } 
-        
-        while(true) {
-            digits >>= 1;
-            if (digits == 0) break;
-            if (exp > remainder) {
-                exp >>= digits;
-                pow >>= digits;
-            } else { 
-                exp <<= digits;
-                pow <<= digits;
+        N pow {1};
+        N exp {Divisor};
+
+        // initialization phase
+        {
+            uint64 digits_per_round {1};
+
+            // we increase exp by increasing powers of 2 until it is bigger than the divisor.
+            while (exp <= Dividend) {
+                exp <<= digits_per_round;
+                pow <<= digits_per_round;
+                digits_per_round <<= 1;
+            }
+
+            // we change exp (either increase or decrease) by decreasing powers of 2 until
+            // it is the maximum power of 2 that is smaller than the divisor.
+            while (true) {
+                digits_per_round >>= 1;
+                if (digits_per_round == 0) break;
+                if (exp > Dividend) {
+                    exp >>= digits_per_round;
+                    pow >>= digits_per_round;
+                } else {
+                    exp <<= digits_per_round;
+                    pow <<= digits_per_round;
+                }
             }
         }
-        
+
+        // division phase
+        division<N> result {0, Dividend};
         while (pow > 0) {
-            while (exp > remainder) {
+            while (exp > result.Remainder) {
                 exp >>= 1;
                 pow >>= 1;
                 if (pow == 0) goto out;
             }
             
-            quotient += pow;
-            remainder -= exp;
+            result.Quotient += pow;
+            result.Remainder -= exp;
         }
+
         out: 
-        
-        return {quotient, remainder};
+        return result;
+    }
+    
+    template <typename N> bool inline divides (const N &dividend, const N &divisor) {
+        return divide<N> (dividend, divisor).Remainder == 0;
     }
     
 }
@@ -69,24 +81,24 @@ namespace data {
     
     template <size_t size> struct decimal {
         char Value[size] = {};
-        bool Valid{false};
+        bool Valid {false};
         
-        constexpr decimal(const char (&input)[size]) noexcept {
+        constexpr decimal (const char (&input)[size]) noexcept {
             if (input[0] < '1' || input[0] > '9') return;
-            for (size_t i{1}; i < size - 1; ++i) {
+            for (size_t i {1}; i < size - 1; ++i) {
                 if (input[i] < '1' || input[i] > '9') return;
             }
             if (input[size - 1] != 0) return;
             Valid = true;
-            for (size_t i{0}; i < size; ++i) Value[i] = input[i];
+            for (size_t i {0}; i < size; ++i) Value[i] = input[i];
         }
         
-        constexpr operator uint64() const {
+        constexpr operator uint64 () const {
             if (size > 20) return 0;
-            uint64 x{0};
-            uint64 digit{1};
-            for (int i{size-2}; i >= 0; --i) {
-                x += digit * static_cast<uint64>(Value[i] - '0');
+            uint64 x {0};
+            uint64 digit {1};
+            for (int i {size-2}; i >= 0; --i) {
+                x += digit * static_cast<uint64> (Value[i] - '0');
                 digit *= 10;
             }
             return x;
@@ -98,9 +110,9 @@ namespace data {
     
     template <> struct decimal<2> {
         char Value[2] = {};
-        bool Valid{false};
+        bool Valid {false};
         
-        constexpr decimal(const char (&input)[2]) noexcept {
+        constexpr decimal (const char (&input)[2]) noexcept {
             if (input[0] < '0' || input[0] > '9') return;
             if (input[1] != 0) return;
             Valid = true;
@@ -108,19 +120,19 @@ namespace data {
             Value[1] = input[1];
         }
         
-        constexpr operator uint64() const {
-            return static_cast<uint64>(Value[0] - '0');
+        constexpr operator uint64 () const {
+            return static_cast<uint64> (Value[0] - '0');
         }
     };
     
-    template <size_t N> decimal(const char (&)[N]) -> decimal<N>;
-    template <size_t N> decimal(decimal<N>) -> decimal<N>;
+    template <size_t N> decimal (const char (&)[N]) -> decimal<N>;
+    template <size_t N> decimal (decimal<N>) -> decimal<N>;
 }
 
 // Peano axioms. 
 namespace data::math::number::peano {
     
-    constexpr decimal zero{"0"};
+    constexpr decimal zero {"0"};
     
     template <auto&> struct 
     number;
@@ -141,29 +153,29 @@ namespace data::math::number::peano {
     
     // axiom 3: equality is symmetric. 
     template <typename x, typename y> 
-    equal<y, x> symmetric_equal(equal<x, y>);
+    equal<y, x> symmetric_equal (equal<x, y>);
     
     // axiom 4: equality is transitive. 
     template <typename x, typename y, typename z> 
-    equal<x, z> transitive_equal(equal<x, y>, equal<y, z>);
+    equal<x, z> transitive_equal (equal<x, y>, equal<y, z>);
     
     template <typename x, typename y> 
-    natural<y> closed_equal(equal<x, y>, natural<x>);
+    natural<y> closed_equal (equal<x, y>, natural<x>);
     
     template <typename> struct 
     suc;
     
     template <typename x> 
-    natural<suc<x>> closed_successor(natural<x>);
+    natural<suc<x>> closed_successor (natural<x>);
     
     template <typename x, typename y>
-    equal<suc<x>, suc<y>> injection_up(equal<x, y>);
+    equal<suc<x>, suc<y>> injection_up (equal<x, y>);
     
     template <typename x, typename y>
-    equal<x, y> injection_down(equal<suc<x>, suc<y>>);
+    equal<x, y> injection_down (equal<suc<x>, suc<y>>);
     
     template <template<typename> typename predicate, typename x, typename y> 
-    predicate<x> induction(natural<x>, predicate<number<zero>>, predicate<suc<y>> (*)(natural<y>, predicate<y>));
+    predicate<x> induction (natural<x>, predicate<number<zero>>, predicate<suc<y>> (*) (natural<y>, predicate<y>));
     
     template <typename, typename> struct add;
     

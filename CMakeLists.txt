@@ -1,38 +1,42 @@
-cmake_minimum_required(VERSION 3.1...3.14)
+cmake_minimum_required (VERSION 3.16)
 
 # Back compatibility for VERSION range
-if(${CMAKE_VERSION} VERSION_LESS 3.12)
-  cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
-endif()
+if (${CMAKE_VERSION} VERSION_LESS 3.12)
+  cmake_policy (VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+endif ()
 
-project(
+project (
   data
-  VERSION 1.0
+  VERSION 0.0.24
   DESCRIPTION "wrappers and high-level programming constructs in c++"
-  LANGUAGES CXX)
+  LANGUAGES CXX
+)
 
-# Set cmake as import path for Find*.cmake files
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package (Boost CONFIG REQUIRED)
+find_package (OpenSSL CONFIG REQUIRED)
+find_package (cryptopp CONFIG REQUIRED)
+find_package (nlohmann_json CONFIG REQUIRED)
+find_package (gmp CONFIG REQUIRED)
+find_package (secp256k1 CONFIG REQUIRED)
+find_package (pegtl CONFIG REQUIRED)
 
 # Check if GTests is installed. If not, install it
 
-option(PACKAGE_TESTS "Build the tests" ON)
+option (PACKAGE_TESTS "Build the tests" ON)
 
-add_definitions("-DHAS_BOOST")
+add_definitions ("-DHAS_BOOST")
 
-if(PACKAGE_TESTS)
-  include(CTest)
-  find_package(GTest REQUIRED)
-  enable_testing()
-  add_subdirectory(test)
+if (PACKAGE_TESTS)
+  include (CTest)
+  find_package (GTest REQUIRED)
+  enable_testing ()
+  add_subdirectory (test)
 
-endif()
+endif ()
 
 # Add Library source files here
 
-add_library(
-  data STATIC
+add_library (data STATIC
   src/sv/fs.cpp
   src/sv/support/cleanse.cpp
   src/sv/support/lockedpool.cpp
@@ -47,18 +51,24 @@ add_library(
   include/rotella/sieve.cpp
   include/rotella/akslib.cpp
   src/data/types.cpp
+  src/data/string.cpp
+  src/data/tools.cpp
   src/data/encoding/hex.cpp
   src/data/encoding/ascii.cpp
-  src/data/encoding/base58.cpp
-  src/data/encoding/base64.cpp
-  src/data/encoding/integer.cpp
   src/data/encoding/utf8.cpp
-  src/data/networking/URL.cpp
-  src/data/networking/HTTP.cpp
-  src/data/networking/REST.cpp
-  src/data/networking/JSON.cpp
-  src/data/networking/TCP.cpp
+  src/data/encoding/base64.cpp
+  src/data/encoding/base58.cpp
+  src/data/encoding/integer.cpp
+  src/data/net/URL.cpp
+  src/data/net/HTTP.cpp
+  src/data/net/REST.cpp
+  src/data/net/JSON.cpp
+  src/data/net/TCP.cpp
+  src/data/net/websocket.cpp
+  src/data/net/HTTP_client.cpp
+  #src/data/io/run.cpp
   src/data/tools/channel.cpp
+  src/data/crypto/random.cpp
   src/data/crypto/secret_share.cpp
   src/data/math/number/gmp/mpq.cpp
   src/data/math/number/gmp/N.cpp
@@ -67,24 +77,30 @@ add_library(
   src/data/crypto/AES.cpp
   src/data/tools/circular_queue.cpp
   src/data/tools/rate_limiter.cpp
-  src/data/log/log.cpp)
+  src/data/log/log.cpp
+)
 
-target_include_directories(data PUBLIC include)
+target_include_directories (data PUBLIC include)
 
-target_link_libraries(
+target_link_libraries (
   data
-  CONAN_PKG::boost
-  CONAN_PKG::openssl
-  CONAN_PKG::cryptopp
-  CONAN_PKG::nlohmann_json
-  CONAN_PKG::gmp
-  CONAN_PKG::SECP256K1
-  CONAN_PKG::uriparser
+  boost::boost
+  openssl::openssl
+  cryptopp::cryptopp
+  nlohmann_json::nlohmann_json
+  gmp::gmp
+  secp256k1::secp256k1
+  taocpp::pegtl
   # PkgConfig::LIBSECP256K1
 )
-get_target_property(OUT data LINK_LIBRARIES)
-message(STATUS ${OUT})
+
+get_target_property (OUT data LINK_LIBRARIES)
+message (STATUS ${OUT})
+
 # Set C++ version
-target_compile_features(data PUBLIC cxx_std_20)
-set_target_properties(data PROPERTIES CXX_EXTENSIONS ON)
-target_compile_options(data PUBLIC "-fconcepts")
+target_compile_features (data PUBLIC cxx_std_20)
+set_target_properties (data PROPERTIES CXX_EXTENSIONS ON)
+target_compile_options (data PUBLIC "-fconcepts")
+
+install (DIRECTORY include/ DESTINATION include)
+install (TARGETS data)

@@ -7,30 +7,29 @@
 
 #include <data/tools/linked_stack.hpp>
 #include <data/math/number/natural.hpp>
-#include <iostream>
 
 namespace data::encoding {
     
     template <typename N>
-    string write_base(const N& n, string digits) {
+    std::string write_base (const N &n, std::string digits) {
         
-        uint32 base = digits.size();
+        N base {digits.size ()};
         if (base < 2) return "";
         
-        linked_stack<char> dig{};
+        linked_stack<char> dig {};
         N x = n;
-        while(x > 0) {
-            math::division<N> d = x.divide(base);
-            dig = dig << digits[(uint64)(d.Remainder)];
+        while (x > 0u) {
+            math::division<N> d = math::number::natural::divide (x, base);
+            dig = dig << digits[(uint64) (d.Remainder)];
             x = d.Quotient;
         }
         
-        string o;
-        o.resize(size(dig));
+        std::string o;
+        o.resize (size (dig));
         int i = 0;
-        while(dig.size() > 0) {
-            o[i] = first(dig);
-            dig = rest(dig);
+        while (dig.size () > 0) {
+            o[i] = first (dig);
+            dig = rest (dig);
             i++;
         }
         
@@ -38,11 +37,11 @@ namespace data::encoding {
     }
     
     template <typename N, typename f>
-    N read_base(string_view s, uint32 base, f inverse_digits) {
-        N n{0};
-        N pow{1};
-        for (auto x = s.rbegin(); x != s.rend(); ++x) {
-            n += pow * inverse_digits(*x);
+    N read_base (string_view s, uint32 base, f inverse_digits) {
+        N n {0};
+        N pow {1};
+        for (auto x = s.rbegin (); x != s.rend (); ++x) {
+            n += pow * inverse_digits (*x);
             pow *= base;
         }
         return n;

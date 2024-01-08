@@ -10,11 +10,18 @@
 namespace data::math {
     
     template <typename elem, typename plus = plus<elem>, typename times = times<elem>>
-    concept ring = abelian<elem, plus> && requires() {
-        {math::identity<times, elem>{}()} -> std::same_as<elem>; 
+    concept ring = abelian<elem, plus> && requires () {
+        {math::identity<times, elem> {} ()} -> std::convertible_to<elem>;
         typename math::associative<times, elem>;
-    } && requires(const elem &a, elem &b) {
-        {times{}(a, b)} -> std::same_as<elem>;
+    } && requires (const elem &a, elem &b) {
+        {times {} (a, b)} -> std::convertible_to<elem>;
+    };
+
+    template <typename elem, typename plus = plus<elem>, typename times = times<elem>>
+    concept integral_domain = ring<elem, plus, times> && requires () {
+        typename math::commutative<times, elem>;
+    } && requires (const nonzero<elem> &a, const nonzero<elem> &b) {
+        {times {} (a, b)} -> std::convertible_to<nonzero<elem>>;
     };
     
 }
