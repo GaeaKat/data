@@ -52,10 +52,23 @@ namespace data::tool {
         sentinel end () const {
             return sentinel {*this};
         }
+
+        template <data::sequence X> requires std::equality_comparable_with<element, data::element_of<X>>
+        bool operator == (const X &x) const {
+            return sequence_equal (*this, x);
+        }
         
     private:
         ordered_stack (const stack &x) : stack {x} {}
     };
+
+
+    template <functional::stack stack, ordered element = element_of<stack>>
+    ordered_stack<stack, element> inline merge (ordered_stack<stack, element> a, ordered_stack<stack, element> b) {
+        return fold ([] (ordered_stack<stack, element> s, const element &e) -> ordered_stack<stack, element> {
+            return s.insert (e);
+        }, ordered_stack<stack, element> {}, data::reverse (data::merge (static_cast<stack> (a), static_cast<stack> (b))));
+    }
     
     template <functional::stack stack, ordered element>
     std::ostream &operator << (std::ostream &o, const ordered_stack<stack, element> &l) {
@@ -79,8 +92,11 @@ namespace data::tool {
     
     template <functional::stack stack, ordered element>
     ordered_stack<stack, element> ordered_stack<stack, element>::insert (const element &x) const {
-        if (this->empty () || x < this->first ()) return {this->prepend (x)};
-        return {rest ().insert (x).prepend (this->first ())};
+        if (this->empty () || x < this->first ()) {
+            return ordered_stack {this->prepend (x)};
+        }
+
+        return ordered_stack {rest ().insert (x).prepend (this->first ())};
     }
 }
 

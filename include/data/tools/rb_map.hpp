@@ -28,7 +28,7 @@ namespace data::tool {
         
     public:
         const V &operator [] (const K &k) const;
-        V *contains (const K& k);
+        V *contains (const K &k);
         const V *contains (const K &k) const;
         bool contains (const entry &e) const;
         
@@ -36,8 +36,8 @@ namespace data::tool {
         const rb_map &left () const;
         const rb_map &right () const;
         
-        rb_map insert (const K& k, const V& v) const;
-        rb_map insert (const entry& e) const;
+        rb_map insert (const K &k, const V &v) const;
+        rb_map insert (const entry &e) const;
         
         rb_map operator << (const entry &e) const;
         
@@ -68,13 +68,14 @@ namespace data::tool {
         
         ordered_stack<linked_stack<entry>> values () const;
         
-        bool operator == (const rb_map &map) const;
-        
         rb_map_iterator<K, V> begin () const;
         
         rb_map_iterator<K, V> end () const;
         
     };
+
+    template <typename K, std::equality_comparable V>
+    bool operator == (const rb_map<K, V> &, const rb_map<K, V> &);
     
     template <typename K, typename V> 
     struct rb_map_iterator {
@@ -111,6 +112,7 @@ namespace data::tool {
     };
 
     // a map that is good for deriving from.
+    // NOTE: it seems that using this type leads to segmentation faults, not sure why.
     template <typename K, typename V, typename derived> struct base_rb_map : rb_map<K, V> {
         using rb_map<K, V>::rb_map;
 
@@ -161,9 +163,9 @@ namespace data::tool {
         for (auto p : init) *this = insert (p);
     }
     
-    template <typename K, typename V>
-    bool inline rb_map<K, V>::operator == (const rb_map &map) const {
-        return values () == map.values ();
+    template <typename K, std::equality_comparable V>
+    bool inline operator == (const rb_map<K, V> &l, const rb_map<K, V> &r) {
+        return l.values () == r.values ();
     }
     
     template <typename K, typename V>
@@ -218,9 +220,10 @@ namespace data::tool {
     rb_map<K, V> rb_map<K, V>::insert (const K &k, const V &v) const {
         const V *already = contains (k);
         if (already == nullptr) return rb_map {Map.inserted (k, v), Size + 1};
+        throw exception {} << "key already exists";/*
         if (*already == v) return *this;
         rb_map removed = this->remove (k);
-        return rb_map {removed.Map.inserted (k, v), removed.Size + 1};
+        return rb_map {removed.Map.inserted (k, v), removed.Size + 1};*/
     }
     
     template <typename K, typename V>
