@@ -35,7 +35,7 @@ namespace data::math {
 
         // p is at least 2
         static X step (X so_far, X pow_2n, N p) {
-            X next_step = p & 1 == 1 ? so_far * pow_2n : so_far;
+            X next_step = (p & 1) == 1 ? so_far * pow_2n : so_far;
             N n = p >> 1;
             if (n == 0) return next_step;
             return step (next_step, square (pow_2n), n);

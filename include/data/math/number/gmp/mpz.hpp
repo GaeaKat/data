@@ -38,7 +38,7 @@ namespace data::math::number::GMP {
     }
     
     inline math::sign sign (const __mpz_struct& mpz) {
-        return !valid (mpz) ? zero : math::sign {mpz_cmp_si (&mpz, 0)};
+        return !valid (mpz) ? zero : math::sign {static_cast<math::sign>(mpz_cmp_si (&mpz, 0))};
     }
     
     struct N;

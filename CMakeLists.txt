@@ -11,15 +11,50 @@ project (
   DESCRIPTION "wrappers and high-level programming constructs in c++"
   LANGUAGES CXX
 )
+include(FetchContent)
 
-find_package (Boost CONFIG REQUIRED)
-find_package (OpenSSL CONFIG REQUIRED)
-find_package (cryptopp CONFIG REQUIRED)
-find_package (nlohmann_json CONFIG REQUIRED)
-find_package (gmp CONFIG REQUIRED)
-find_package (secp256k1 CONFIG REQUIRED)
-find_package (pegtl CONFIG REQUIRED)
-find_package (argh CONFIG REQUIRED)
+
+
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_Declare(secp256k1
+        GIT_REPOSITORY https://github.com/bitcoin-core/secp256k1
+        GIT_TAG v0.5.0
+)
+FetchContent_Declare(cryptopp-cmake
+    GIT_REPOSITORY https://github.com/abdes/cryptopp-cmake
+        GIT_TAG CRYPTOPP_8_9_0
+)
+FetchContent_Declare(pegtl
+        GIT_REPOSITORY https://github.com/taocpp/PEGTL
+        GIT_TAG 3.2.7)
+FetchContent_Declare(argh
+        GIT_REPOSITORY https://github.com/adishavit/argh
+        GIT_TAG v1.3.2)
+
+
+FetchContent_MakeAvailable(cryptopp-cmake)
+FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(json)
+FetchContent_MakeAvailable(secp256k1)
+FetchContent_MakeAvailable(pegtl)
+FetchContent_MakeAvailable(argh)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+find_package(
+        Boost 1.82 REQUIRED)
+
+find_package (OpenSSL)
+find_package(GMP)
+find_package(NTL)
+
+
 
 # Check if GTests is installed. If not, install it
 
@@ -29,13 +64,13 @@ add_definitions ("-DHAS_BOOST")
 
 if (PACKAGE_TESTS)
   include (CTest)
-  find_package (GTest REQUIRED)
   enable_testing ()
   add_subdirectory (test)
 
 endif ()
 
 # Add Library source files here
+include("cmake/Symbols.cmake")
 
 add_library (data STATIC
   src/sv/fs.cpp
@@ -85,13 +120,14 @@ target_include_directories (data PUBLIC include)
 
 target_link_libraries (
   data
-  boost::boost
-  openssl::openssl
+        Boost::headers
+        OpenSSL::SSL
   cryptopp::cryptopp
   nlohmann_json::nlohmann_json
-  gmp::gmp
-  secp256k1::secp256k1
-  taocpp::pegtl
+  ntl
+        gmp
+  secp256k1
+  pegtl
   argh
   # PkgConfig::LIBSECP256K1
 )
@@ -102,7 +138,7 @@ message (STATUS ${OUT})
 # Set C++ version
 target_compile_features (data PUBLIC cxx_std_20)
 set_target_properties (data PROPERTIES CXX_EXTENSIONS ON)
-target_compile_options (data PUBLIC "-fconcepts")
+#target_compile_options (data PUBLIC "-fconcepts")
 
 install (DIRECTORY include/ DESTINATION include)
 install (TARGETS data)

@@ -14,11 +14,11 @@ macro (package_add_test TESTNAME)
     target_include_directories (${TESTNAME} PUBLIC ${CMAKE_SOURCE_DIR}/include
     boost::boost 
     openssl::openssl 
-    cryptopp::cryptopp 
+    cryptopp 
     nlohmann_json::nlohmann_json 
     gmp::gmp 
-    secp256k1::secp256k1)
-    target_link_libraries (${TESTNAME} gtest::gtest data)
+    secp256k1)
+    target_link_libraries (${TESTNAME} GTest::gtest data)
     # gtest_discover_tests replaces gtest_add_tests,
     # see https://cmake.org/cmake/help/v3.10/module/GoogleTest.html for more options to pass to it
 

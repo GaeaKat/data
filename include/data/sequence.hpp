@@ -155,12 +155,12 @@ namespace data {
 }
 
 namespace std {
-    template <typename list> 
-    struct iterator_traits<data::sequence_iterator<list>> {
-        using value_type = remove_const_t<data::element_of<list>>;
+    template <typename L>
+    struct iterator_traits<data::sequence_iterator<L>> {
+        using value_type = remove_const_t<data::element_of<L>>;
         using difference_type = int;
-        using pointer = const remove_reference_t<data::element_of<list>> *;
-        using reference = const data::element_of<list> &;
+        using pointer = const remove_reference_t<data::element_of<L>> *;
+        using reference = const data::element_of<L> &;
         using iterator_concept = input_iterator_tag;
     };
 }
